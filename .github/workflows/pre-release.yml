@@ -1,0 +1,176 @@
+# ============================================================
+# .github/workflows/pre-release.yml
+# ============================================================
+# Updated: 2026-09-29
+
+# WHY: Pre-release checks and build.
+# REQ: Trigger on version tags like v1.2.3.
+
+name: Pre-Release Checks and Build
+
+on:
+  workflow_call: # WHY: Allow calling from PyPI repos in this org.
+  workflow_dispatch: # WHY: Allow manual trigger for pre-release checks if needed.
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1" # WHY: Real-time logging.
+  PYTHONIOENCODING: "utf-8" # WHY: Ensure UTF-8 encoding for international characters.
+  UV_FROZEN: "1" # WHY: CI MUST use the committed lockfile without updating it.
+
+jobs:
+  pre-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # WHY: Prevent hanging jobs. If over, it is likely stuck.
+    environment: pypi # WHY: Use 'pypi' environment for PyPI publishing; ignore warnings.
+
+    steps:
+      # === ASSEMBLE ===
+
+      - name: A1) Checkout repository with full history and tags
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # WHY: hatch-vcs needs full history to derive version from tags.
+          fetch-tags: true
+          ref: ${{ github.ref }}
+          persist-credentials: false
+          # WHY: Required so all subsequent steps can access repo files.
+
+      - name: A2) Install uv (with caching)
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: auto
+          cache-dependency-glob: "uv.lock"
+          # WHY: Invalidate dependency cache when the committed lockfile changes.
+
+      - name: A3) Install project Python
+        run: uv python install
+        # WHY: Ensures the Python version declared in .python-version is available.
+        # OBS: uv manages the interpreter locally in the CI environment.
+
+      - name: A4) Install dependencies from committed lockfile
+        run: uv sync --frozen
+        # WHY: Install all configured dependency groups exactly from uv.lock.
+        # REQ: CI MUST fail rather than update a stale or incompatible lockfile.
+
+      - name: A5) Show tool versions
+        run: |
+          uv --version
+          uv run python --version
+          uv run python -m ruff --version
+          uv run ty --version
+          if [ -f "zensical.toml" ]; then
+            uv run python -m zensical --version
+          fi
+          uv run --no-sync prek --version 2>/dev/null \
+            || uv run --no-sync pre-commit --version 2>/dev/null \
+            || echo "No hook runner installed"
+        # WHY: Version output makes CI logs easier to debug when tools change.
+
+      # ============================================================
+      # B) BUILD
+      # ============================================================
+
+      - name: B1) Identify release tag, if present
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "ERROR: Expected a release tag such as v0.1.0."
+              exit 1
+            fi
+
+            echo "release=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Manual branch run: development build."
+            echo "release=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: B2) Check version consistency
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            uv run --locked se_mapspec check-version --require-tag
+          else
+            uv run --locked se_mapspec check-version
+          fi
+
+      - name: B3) Run lint and type checks
+        run: |
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+          uv run --locked ty check
+
+      - name: B4) Run tests
+        run: uv run --locked pytest
+
+      - name: B5) Validate canonical alignment schema
+        run: uv run --locked se_mapspec validate-schema --strict
+
+      - name: B6) Validate example alignment
+        run: |
+          uv run --locked se_mapspec validate-alignment \
+            --path examples/alignment.toml \
+            --strict
+
+      - name: B7) Verify git is clean before build
+        run: |
+          echo "Git status:"
+          git status --short
+          echo "Git describe:"
+          git describe --tags --always --dirty
+          if [[ $(git status --porcelain) ]]; then
+            echo "ERROR: Git tree is dirty before build!"
+            exit 1
+          fi
+
+      - name: B8) Build sdist + wheel
+        # WHY: hatch-vcs derives version from git tag; build before uv sync
+        # to avoid working tree changes invalidating the clean check.
+        run: uv build
+
+      # ============================================================
+      # C) CHECKS
+      # ============================================================
+
+      - name: C1) Ensure built artifact version matches tag
+        shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.release }}
+        run: |
+          set -e
+          echo "Tag version: $TAG"
+          ls dist
+          if ! ls dist/*"$TAG"*.whl dist/*"$TAG"*.tar.gz >/dev/null 2>&1; then
+            echo "ERROR: Built artifact version does not match tag $TAG"
+            exit 1
+          fi
+          echo "Artifact version matches tag."
+
+      - name: C2) Confirm wheel contains runtime schema artifact
+        shell: bash
+        run: |
+          set -e
+          python - <<'PY'
+          import pathlib
+          import zipfile
+
+          wheels = list(pathlib.Path("dist").glob("*.whl"))
+          assert wheels, "No wheel found"
+
+          wheel = wheels[-1]
+          names = zipfile.ZipFile(wheel).namelist()
+          matches = [name for name in names if name.endswith("alignment-schema.toml")]
+
+          print(matches)
+
+          assert (
+              "se_mapspec/alignment-schema.toml" in names
+          ), "Wheel is missing se_mapspec/alignment-schema.toml"
+          PY
+
+      - name: C3) Sync dependencies after build
+        run: uv sync --frozen

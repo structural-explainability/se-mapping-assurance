@@ -1,0 +1,138 @@
+# ============================================================
+# pyproject.toml (ALL-PY-SRC-REPOS)
+# ============================================================
+# Updated: 2026-09-29
+# REQ: Python projects SHOULD include pyproject.toml as the single source of truth.
+# WHY: Centralizes Python project configuration.
+
+# ============================================================
+# === SECTION 1: PROJECT IDENTITY ===
+# ============================================================
+
+[project]
+name = "se-mapping-assurance"
+description = "Reusable assurance-domain mapping definitions and validation."
+dynamic = ["version"]
+readme = "README.md"
+requires-python = ">=3.14"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+keywords = ["structural-explainability", "structural-assurance"]
+dependencies = ["se-mapspec"]
+
+[dependency-groups]
+dev = ["prek", "pytest>=9", "pytest-cov", "ruff", "twine", "ty"]
+# WHY: Documentation dependencies are isolated from runtime dependencies.
+docs = ["mkdocstrings[python]", "zensical"]
+
+[project.urls]
+"Documentation" = "https://structural-explainability.github.io/se-mapping-assurance/"
+"Homepage" = "https://github.com/structural-explainability/se-mapping-assurance"
+"Issues" = "https://github.com/structural-explainability/se-mapping-assurance/issues"
+"Source" = "https://github.com/structural-explainability/se-mapping-assurance"
+
+[project.scripts]
+se-mapping-assurance = "se_mapping_assurance.cli:main"
+
+# ============================================================
+# === SECTION 2: TOOL CONFIGURATION ===
+# ============================================================
+
+# === PYTEST (VERIFY LOGIC) ===
+
+[tool.pytest.ini_options]
+# WHY: Consistent test discovery and coverage visibility.
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = "--cov=se_mapping_assurance --cov-fail-under=20 --cov-report=term-missing"
+
+# === RUFF (PYTHON FORMATTING AND LINTING) ===
+
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.lint]
+# WHY: Evolve with Ruff's defaults; add rules only where the repository needs them.
+extend-select = [
+    # "D", # Require docstrings when desired.
+]
+
+[tool.ruff.lint.isort]
+# WHY: Sort plain-import and from-import lines together within each section.
+force-sort-within-sections = true
+
+[tool.ruff.lint.per-file-ignores]
+"src/**/__init__.py" = ["F401"]
+"src/**/_version.py" = ["ALL"]
+"tests/**/*.py" = ["D", "B018"]
+"notebooks/**/*.py" = ["D", "PLR1711", "RUF059"]
+"src/**/notebook.py" = ["B018", "D", "PLR1711", "RUF059"]
+
+[tool.ruff.lint.pydocstyle]
+# WHY: Use Google docstring style when D rules are enabled.
+convention = "google"
+
+# === UV (PYTHON ENVIRONMENT AND DEPENDENCY MANAGEMENT) ===
+
+[tool.uv]
+# WHY: Install all dependency groups defined by this repository by default.
+default-groups = "all"
+
+# WHY: Allow time for newly published releases to receive ecosystem scrutiny.
+# CUSTOM: Should match `uv run prek update --freeze --cooldown-days 7`.
+exclude-newer = "7 days"
+exclude-newer-package = { se-mapspec = false }
+
+# ============================================================
+# === SECTION 3: BUILD SYSTEM ===
+# ============================================================
+#
+# REQ.PROJECT: A build system MUST be declared for package discovery and publishing.
+# REQ.STRUCTURE: All importable code MUST live under src/.
+# WHY: Hatchling provides the package build backend.
+# WHY: hatch-vcs derives the package version from Git tags.
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling", "hatch-vcs"]
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+
+[tool.hatch.build.hooks.vcs]
+# WHY: Writes computed version into src/*/_version.py at build time.
+# CUSTOM: Must match src/ folders
+version-file = "src/se_mapping_assurance/_version.py"
+
+[tool.hatch.build.targets.wheel]
+# CUSTOM: Must match src/ folders.
+packages = ["src/se_mapping_assurance"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"assurance-mapping-schema.toml" = "se_mapping_assurance/assurance-mapping-schema.toml"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/assurance-mapping-schema.toml",
+    "/LICENSE",
+    "/README.md",
+    "/pyproject.toml",
+]
+
+[tool.hatch.version]
+# WHY: Version derived from git tags at build time — no manual source file edits.
+source = "vcs"
+fallback-version = "0.1.0"                              # Used when no git tags present (fresh clone, CI).
+tag-pattern = "^(?:v)?(?P<version>\\d+\\.\\d+\\.\\d+)$"

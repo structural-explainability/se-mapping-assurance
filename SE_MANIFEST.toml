@@ -1,0 +1,98 @@
+# ============================================================
+# SE_MANIFEST.toml (Repository Declaration)
+# ============================================================
+
+schema = "se-manifest-schema"
+schema_version = "0.5.0"
+schema_url = "https://raw.githubusercontent.com/structural-explainability/se-manifest-schema/main/manifest-schema.toml"
+
+# === Framework Context ===
+
+[meta]
+framework = "Structural Explainability"
+framework_url = "https://github.com/structural-explainability"
+purpose = "Declares this repository's role in the Structural Explainability ecosystem."
+
+# === Repository Identity ===
+
+[repository]
+organization = "structural-explainability"
+name = "se-mapping-assurance"
+class = "mapping"
+kind = "assurance"
+since = "2026"
+status = "active"
+summary = "Reusable assurance-domain mapping schema, record definitions, and structural validation."
+
+# === Governance ===
+
+[governance]
+authority_manifest = ".accountability/surfaces.toml"
+
+# === Layer Position ===
+
+[layer]
+space = "mapping"
+role = "mapping"
+
+# === Dependency Declarations ===
+
+[depends]
+required = [
+    { repository = "se-mapspec", kind = "semantic", reason = "Provides general mapping vocabulary and structural correspondence rules." },
+]
+optional = []
+
+# === Provided Artifacts ===
+
+[provides]
+artifacts = [
+    ".accountability/surfaces.toml",
+    "assurance-mapping-schema.toml",
+    "docs/en/index.md",
+    "src/se_mapping_assurance",
+]
+
+# === Compatibility ===
+
+[compatibility]
+constitution = "se-constitution"
+kernel = "se-kernel"
+mapspec = "se-mapspec"
+
+# === Scope ===
+
+[scope]
+includes = [
+    "assurance-domain mapping record definitions",
+    "canonical assurance mapping schema",
+    "claim and evidence relationships",
+    "observation and evidentiary distinction records",
+    "evaluator conditions and resource constraints",
+    "explicit assumptions concerning provenance, integrity, and trust",
+    "references to applicable formal definitions and results",
+    "structural validation of assurance mapping records",
+    "reusable validation tooling for framework-specific mapping repositories",
+]
+
+excludes = [
+    "general mapping vocabulary and correspondence rules owned by se-mapspec",
+    "formal definitions and theorems owned by theory repositories",
+    "framework-specific crosswalks and research findings",
+    "determination that an external framework contains a gap",
+    "determination that available evidence resolves an assurance claim",
+    "evaluation of assurance-argument sufficiency",
+    "legal or regulatory compliance determinations",
+    "certification of system safety or trustworthiness",
+]
+
+# === Citation ===
+
+[citation]
+cff = "CITATION.cff"
+preferred = "CITATION.cff"
+
+# === Traceability ===
+
+[traceability]
+identifier_map = "none"

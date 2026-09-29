@@ -1,0 +1,211 @@
+# ============================================================
+# assurance-mapping-schema.toml
+# ============================================================
+# Canonical structural-explainability assurance mapping schema definition.
+# Defines required sections, fields, and validation rules for
+# mapping record toml files in the Structural Explainability ecosystem.
+#
+# Navigation:
+#   [meta]                    schema identity
+#   [field]                   field definitions
+#
+# Validate the canonical schema.
+# uv run se-mapping-assurance validate-schema --path assurance-mapping-schema.toml --strict
+#
+# Validate a record in the consuming pilot.
+# uv run se-mapping-assurance validate-mapping --path docs/en/mappings/eu-ai-act/record-001.toml --strict
+# ============================================================
+
+[meta]
+assurance_mapping_schema_id = "se-mapping-assurance-schema-1"
+purpose = "Defines the structure and validation rules for assurance mapping records in the Structural Explainability ecosystem."
+schema = "se-mapping-assurance"
+status = "draft"
+title = "Structural Explainability Assurance Mapping Schema"
+version = "0.1.0"
+
+# ------------------------------------------------------------
+# === Field Definitions ===
+# ------------------------------------------------------------
+
+[field.record_id]
+required = true
+type = "string"
+description = "Stable identifier, e.g. TEVV-001, AISI-001."
+pattern = "^[A-Z][A-Z0-9]*-[0-9]{3}$"
+
+[field.status]
+required = true
+type = "enum"
+values = ["OPEN", "CLOSED_NO_FINDING", "CLOSED_FINDING", "SUPERSEDED"]
+
+[field.framework]
+required = true
+type = "string"
+description = "Name of the external framework or source body."
+
+[field.focus]
+required = true
+type = "string"
+
+# === Field Source ===
+
+[field.source_publisher]
+required = true
+type = "string"
+
+[field.source_document]
+required = true
+type = "string"
+
+[field.source_version_or_date]
+description = """Free-form: a version string or a publication date. Records
+  observed so far use one or the other, not both; validate.py does not
+  require a specific format."""
+required = true
+type = "string"
+
+[field.source_url]
+required = true
+type = "string"
+format = "url"
+
+[field.source_related_links]
+description = """Secondary source links (overview page, companion explanation, request-for-comment page, etc.).
+  Unified list rather than separately named fields, since observed records name this differently
+  per framework."""
+required = false
+list = true
+
+[field.reviewed_material]
+required = true
+list = true
+min_items = 1
+
+[field.source_review_pending]
+required = false
+list = true
+
+# === Field Source Structure ===
+
+[field.source_structure]
+description = """Prose description of the source's own structural concepts.
+  Must not introduce Structural Assurability vocabulary."""
+required = true
+type = "text"
+
+# === Field Evaluative Claim ===
+
+[field.evaluative_claim]
+required = true
+type = "text"
+
+[field.claim_adoption_status]
+description = """Explicit statement of what is and is not adopted from the
+  source (e.g. 'no particular assessment selected', 'pilot does not adopt
+  this claim for any system')."""
+required = true
+type = "text"
+
+# === Field Required Distinctions ===
+
+[field.required_distinctions]
+description = """What alternatives the investigation must identify, and the
+  constraint that they be derived from the source rather than assumed."""
+required = true
+type = "text"
+
+# === Field Evidence ===
+
+[field.evidence_source_described]
+required = true
+list = true
+min_items = 1
+
+[field.evidence_to_be_established]
+required = true
+list = true
+min_items = 1
+
+# === Field Evaluator Conditions ===
+
+[field.evaluator_conditions]
+description = """Role, access, cooperation, resources, provenance/trust
+  assumptions as a list of conditions still to be specified or already
+  specified for this record."""
+required = true
+list = true
+min_items = 1
+
+# === Field Assumptions ===
+
+[field.assumptions]
+required = true
+type = "text"
+
+# === Field Structural Assurability Mapping ===
+
+[field.applicable_concepts]
+description = """Named formal concepts from the theory repo (may reference
+  specific Lean modules)."""
+required = true
+list = true
+min_items = 1
+
+[field.mapping_explanation]
+required = true
+type = "text"
+
+[field.theory_boundary]
+description = """Explicit statement of what the theory does NOT establish
+  for this record (independent justification required, etc.)."""
+required = true
+type = "text"
+
+# === Field Research Question ===
+
+[field.research_question]
+required = true
+type = "text"
+
+# === Field Evidence and Analysis ===
+
+[field.analysis_completed]
+required = true
+list = true
+
+[field.analysis_pending]
+required = true
+list = true
+description = "Pending analysis items; non-empty when status is OPEN."
+
+[validation.status]
+open_requires_pending = true
+closed_forbids_pending = true
+
+[field.counterexample_caveat]
+description = """Statement of what a constructed counterexample would and
+  would not establish."""
+required = true
+type = "text"
+
+# === Field Outcome ===
+
+[field.outcome_statement]
+description = """Must include an explicit 'no deficiency/failure has been
+  established' disclaimer while status is OPEN."""
+required = true
+type = "text"
+
+[field.possible_outcomes]
+required = true
+type = "text"
+
+# === Field Related Material ===
+
+[field.related_material]
+description = """Links, at minimum to the source crosswalk and the pilot
+  specification."""
+required = true
+list = true
+min_items = 1
