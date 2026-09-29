@@ -4,9 +4,10 @@ Field names follow the canonical assurance-mapping-schema.toml exactly.
 The record model does not determine the validity of a research finding.
 """
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, Mapping
+from typing import Any
 
 
 class RecordStatus(StrEnum):
@@ -53,7 +54,7 @@ class MappingRecord:
     source_review_pending: list[str] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "MappingRecord":
+    def from_dict(cls, data: Mapping[str, Any]) -> MappingRecord:
         """Build a typed record after schema validation, with field diagnostics."""
         from se_mapping_assurance.validate import validate_mapping
 

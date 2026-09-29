@@ -6,7 +6,9 @@ import shutil
 import subprocess
 import tomllib
 
-_CFF_VERSION = re.compile(r'''^version:\s*["']?(?P<version>[^"'\s#]+)["']?\s*(?:#.*)?$''')
+_CFF_VERSION = re.compile(
+    r"""^version:\s*["']?(?P<version>[^"'\s#]+)["']?\s*(?:#.*)?$"""
+)
 
 
 def citation_version(path: Path) -> str:
@@ -21,7 +23,12 @@ def fallback_version(path: Path) -> str:
     """Read the Hatch-VCS fallback version without changing the project."""
     with path.open("rb") as stream:
         config = tomllib.load(stream)
-    version = config.get("tool", {}).get("hatch", {}).get("version", {}).get("fallback-version")
+    version = (
+        config.get("tool", {})
+        .get("hatch", {})
+        .get("version", {})
+        .get("fallback-version")
+    )
     if not isinstance(version, str) or not version:
         raise ValueError("pyproject.toml has no Hatch-VCS fallback-version")
     return version

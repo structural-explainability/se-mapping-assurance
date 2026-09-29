@@ -14,6 +14,7 @@ def test_built_wheel_schema_matches_root() -> None:
         pytest.skip("Run uv build before distribution verification")
     assert len(wheels) == 1
     with ZipFile(wheels[0]) as archive:
-        assert archive.read("se_mapping_assurance/assurance-mapping-schema.toml") == (
-            ROOT / "assurance-mapping-schema.toml"
-        ).read_bytes()
+        assert (
+            archive.read("se_mapping_assurance/assurance-mapping-schema.toml")
+            == (ROOT / "assurance-mapping-schema.toml").read_bytes()
+        )

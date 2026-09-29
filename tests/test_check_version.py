@@ -28,9 +28,7 @@ def test_missing_metadata(tmp_path: Path) -> None:
     assert check_version.run(root=tmp_path) == 1
 
 
-def test_require_tag(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_require_tag(tmp_path: Path, monkeypatch) -> None:
     _write_metadata(tmp_path, citation="0.1.0", fallback="0.1.0")
     monkeypatch.setattr(check_version, "git_tag", lambda _: "v0.1.0")
     assert check_version.run(require_tag=True, root=tmp_path) == 0

@@ -15,12 +15,32 @@ def test_help_without_command(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_validate_schema(capsys: pytest.CaptureFixture[str]) -> None:
-    assert main(["validate-schema", "--path", str(ROOT / "assurance-mapping-schema.toml"), "--strict"]) == 0
+    assert (
+        main(
+            [
+                "validate-schema",
+                "--path",
+                str(ROOT / "assurance-mapping-schema.toml"),
+                "--strict",
+            ]
+        )
+        == 0
+    )
     assert "[schema] OK" in capsys.readouterr().out
 
 
 def test_validate_mapping(capsys: pytest.CaptureFixture[str]) -> None:
-    assert main(["validate-mapping", "--path", str(ROOT / "examples" / "record-001.toml"), "--strict"]) == 0
+    assert (
+        main(
+            [
+                "validate-mapping",
+                "--path",
+                str(ROOT / "examples" / "record-001.toml"),
+                "--strict",
+            ]
+        )
+        == 0
+    )
     assert "[mapping] OK" in capsys.readouterr().out
 
 
@@ -29,7 +49,18 @@ def test_bad_mapping_exits_with_field_diagnostic(
 ) -> None:
     file = tmp_path / "bad.toml"
     file.write_text('record_id = "DEMO-001"\n', encoding="utf-8")
-    assert main(["validate-mapping", "--path", str(file), "--schema-path", str(ROOT / "assurance-mapping-schema.toml")]) == 1
+    assert (
+        main(
+            [
+                "validate-mapping",
+                "--path",
+                str(file),
+                "--schema-path",
+                str(ROOT / "assurance-mapping-schema.toml"),
+            ]
+        )
+        == 1
+    )
     assert "status" in capsys.readouterr().out
 
 

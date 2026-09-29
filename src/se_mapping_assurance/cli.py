@@ -30,7 +30,9 @@ def _report(result: ValidationResult, label: str) -> int:
 
 def _run_schema(args: argparse.Namespace) -> int:
     """Load and structurally validate an assurance schema."""
-    return _report(validate_schema(load_schema(args.path), strict=args.strict), "schema")
+    return _report(
+        validate_schema(load_schema(args.path), strict=args.strict), "schema"
+    )
 
 
 def _run_mapping(args: argparse.Namespace) -> int:
@@ -55,19 +57,33 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command")
 
-    schema = subparsers.add_parser("validate-schema", help="Validate the assurance schema")
+    schema = subparsers.add_parser(
+        "validate-schema", help="Validate the assurance schema"
+    )
     schema.add_argument("--path", type=Path, help="Defaults to the canonical schema")
-    schema.add_argument("--strict", action="store_true", help="Treat warnings as errors")
+    schema.add_argument(
+        "--strict", action="store_true", help="Treat warnings as errors"
+    )
     schema.set_defaults(func=_run_schema)
 
-    mapping = subparsers.add_parser("validate-mapping", help="Validate one assurance-mapping TOML file")
+    mapping = subparsers.add_parser(
+        "validate-mapping", help="Validate one assurance-mapping TOML file"
+    )
     mapping.add_argument("--path", type=Path, required=True, help="Mapping record file")
-    mapping.add_argument("--schema-path", type=Path, help="Defaults to the canonical schema")
-    mapping.add_argument("--strict", action="store_true", help="Treat warnings as errors")
+    mapping.add_argument(
+        "--schema-path", type=Path, help="Defaults to the canonical schema"
+    )
+    mapping.add_argument(
+        "--strict", action="store_true", help="Treat warnings as errors"
+    )
     mapping.set_defaults(func=_run_mapping)
 
-    version = subparsers.add_parser("check-version", help="Check release version consistency")
-    version.add_argument("--require-tag", action="store_true", help="Require a release Git tag")
+    version = subparsers.add_parser(
+        "check-version", help="Check release version consistency"
+    )
+    version.add_argument(
+        "--require-tag", action="store_true", help="Require a release Git tag"
+    )
     version.set_defaults(func=_run_version)
     return parser
 
@@ -82,5 +98,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return EXIT_NO_COMMAND
     try:
         return action(args)
-    except (FileNotFoundError, PermissionError, UnicodeError, tomllib.TOMLDecodeError, ValueError) as exc:
+    except (
+        FileNotFoundError,
+        PermissionError,
+        UnicodeError,
+        tomllib.TOMLDecodeError,
+        ValueError,
+    ) as exc:
         parser.exit(1, f"se-mapping-assurance: {exc}\n")

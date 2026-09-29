@@ -1,0 +1,53 @@
+# ============================================================
+# CITATION.cff (How to cite this project)
+# ============================================================
+
+# REQ.UNIVERSAL: Professional open projects SHOULD include this file.
+# USAGE: See https://citation-file-format.github.io/ for details.
+
+cff-version: "1.2.0"
+message: "If you use this work, please cite it using the metadata in CITATION.cff."
+type: software
+
+title: "Structural Explainability Mapping: Assurance"
+version: "0.1.0"
+date-released: "2026-09-29"
+
+authors:
+  - family-names: Case
+    given-names: Denise M.
+    orcid: "https://orcid.org/0000-0001-6165-7389"
+    affiliation: "Northwest Missouri State University, School of Computer Science and Information Systems, Maryville, MO, USA"
+
+repository-code: "https://github.com/structural-explainability/se-mapping-assurance"
+url: "https://github.com/structural-explainability/se-mapping-assurance"
+
+license: MIT
+
+abstract: >
+  Assurance-domain mapping record schema and structural validation for
+  the Structural Explainability ecosystem. This repository defines and
+  validates the record format used to map external assurance and evaluation
+  frameworks against Structural Assurability. Validation checks record
+  completeness and internal consistency. It does not determine whether
+  a framework has a gap, whether a theorem applies to a real system,
+  or whether an assurance argument is justified.
+
+keywords:
+  - structural-explainability
+  - structural-assurability
+  - assurance-mapping
+  - mapping-schema
+  - structural-validation
+  - assurance-evidence
+  - evaluation-frameworks
+  - evaluator-conditions
+  - declarative-specification
+  - schema-validation
+  - reproducible-research
+  - software-assurance
+  - traceability
+  - research-infrastructure
+  - python
+  - open-source
+  - se-mapspec

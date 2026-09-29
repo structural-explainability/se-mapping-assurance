@@ -19,20 +19,39 @@ def test_typed_record_passes(open_record: dict) -> None:
     assert asdict(record)["record_id"] == "DEMO-001"
 
 
-@pytest.mark.parametrize("field_name", [
-    "record_id", "status", "source_url", "reviewed_material", "outcome_statement",
-    "analysis_completed", "analysis_pending", "related_material",
-])
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "record_id",
+        "status",
+        "source_url",
+        "reviewed_material",
+        "outcome_statement",
+        "analysis_completed",
+        "analysis_pending",
+        "related_material",
+    ],
+)
 def test_missing_required_fields(open_record: dict, field_name: str) -> None:
     open_record.pop(field_name)
     result = validate_mapping(open_record)
-    assert any(issue.field == field_name and issue.severity == "error" for issue in result.issues)
+    assert any(
+        issue.field == field_name and issue.severity == "error"
+        for issue in result.issues
+    )
 
 
-@pytest.mark.parametrize("field_name", [
-    "reviewed_material", "evidence_source_described", "evidence_to_be_established",
-    "evaluator_conditions", "applicable_concepts", "related_material",
-])
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "reviewed_material",
+        "evidence_source_described",
+        "evidence_to_be_established",
+        "evaluator_conditions",
+        "applicable_concepts",
+        "related_material",
+    ],
+)
 def test_required_lists_nonempty(open_record: dict, field_name: str) -> None:
     open_record[field_name] = []
     assert not validate_mapping(open_record).ok
@@ -44,7 +63,10 @@ def test_optional_lists_absent_is_valid(open_record: dict) -> None:
 
 def test_required_list_items_are_strings(open_record: dict) -> None:
     open_record["reviewed_material"] = [1]
-    assert any(issue.field == "reviewed_material" for issue in validate_mapping(open_record).issues)
+    assert any(
+        issue.field == "reviewed_material"
+        for issue in validate_mapping(open_record).issues
+    )
 
 
 def test_blank_list_entries_are_rejected(open_record: dict) -> None:
@@ -101,7 +123,9 @@ def test_unknown_fields_warn_or_fail_strict(open_record: dict) -> None:
 
 
 def test_semantic_content_is_not_judged(open_record: dict) -> None:
-    open_record["outcome_statement"] = "A substantive conclusion requiring external review."
+    open_record["outcome_statement"] = (
+        "A substantive conclusion requiring external review."
+    )
     open_record["mapping_explanation"] = "A disputed interpretation."
     assert validate_mapping(open_record).ok
 

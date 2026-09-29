@@ -163,13 +163,13 @@ jobs:
 
           wheel = wheels[-1]
           names = zipfile.ZipFile(wheel).namelist()
-          matches = [name for name in names if name.endswith("alignment-schema.toml")]
+          matches = [name for name in names if name.endswith("assurance-mapping-schema.toml")]
 
           print(matches)
 
           assert (
-              "se_mapspec/alignment-schema.toml" in names
-          ), "Wheel is missing se_mapspec/alignment-schema.toml"
+              "se_mapspec/assurance-mapping-schema.toml" in names
+          ), "Wheel is missing se_mapspec/assurance-mapping-schema.toml"
           PY
 
       - name: C3) Sync dependencies after build

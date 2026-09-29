@@ -15,14 +15,28 @@ and this project adheres to **[Semantic Versioning](https://semver.org/spec/v2.0
 
 ### Added
 
-- Initial structural alignment schema and mapping vocabulary.
-- Typed alignment record representation.
-- Alignment-record loading and structural validation.
-- Schema validation.
-- CLI commands: `validate-schema`, `validate-alignment`, and `check-version`.
-- Canonical root-level `alignment-schema.toml`, included in package distributions.
-- Alignment examples and automated tests.
+- Initial assurance-mapping record schema for Structural Explainability.
+- Canonical root-level `assurance-mapping-schema.toml`, included in package distributions.
+- Typed assurance-mapping record representation.
+- TOML record loading and structural validation.
+- Validation of required fields, types, enumerated values, and list constraints.
+- Status-consistency checks, including pending-analysis requirements for
+  `OPEN` and `CLOSED_*` records.
+- CLI commands: `validate-schema`, `validate-mapping`, and `check-version`.
+- An example mapping record and automated tests.
 - Documentation, repository scaffolding, and CI.
+- Dependency on `se-mapspec` for general structural mapping definitions.
+
+### Scope
+
+Validation establishes that a record conforms to the declared structural
+contract.
+It does not establish the correctness of source interpretation,
+the applicability of formal results, the existence of framework gaps,
+or the sufficiency of assurance evidence.
+
+Framework-specific mappings and research findings remain in consuming
+repositories.
 
 ---
 
@@ -36,8 +50,9 @@ We use **SemVer**:
 
 Package versions are derived from Git tags. Tag `vX.Y.Z` to release.
 
-The version in `alignment-schema.toml` tracks the schema contract independently
-of the package version. Update it when the schema contract changes.
+The version in `assurance-mapping-schema.toml` tracks the schema contract
+independently of the package version.
+Update it when the schema contract changes.
 
 ## Release Procedure (Required)
 
@@ -45,14 +60,14 @@ Follow these steps exactly when creating a new release.
 
 ### Task 1. Update release metadata (manual edits)
 
-1.1. `alignment-schema.toml` version if the schema contract changes.
+1.1. `assurance-mapping-schema.toml` version if the schema contract changes.
 1.2. CHANGELOG.md: add section, move unreleased entries, update links
 1.3. `CITATION.cff` - update `version` and `date-released`
 1.4. `pyproject.toml` - update build system `fallback-version`
 
 Do not manually edit the generated `src/se_mapping_assurance/_version.py`.
 
-### Task 2. Validate
+### Task 2. Prepare and Validate
 
 Run from the repository root in PowerShell.
 
@@ -73,7 +88,6 @@ uvx prek run --all-files
 
 # Audit the resulting GitHub configuration for security findings
 uvx zizmor@latest .github/
-uvx zizmor@latest .github/ --fix=all
 
 # Validate citation metadata
 uvx cffconvert --validate
@@ -82,11 +96,11 @@ uvx cffconvert --validate
 npx markdownlint-cli2 --fix
 
 # Check release metadata.
-uv run se_mapping_assurance check-version
+uv run se-mapping-assurance check-version
 
 # Validate the canonical schema and example.
-uv run se_mapping_assurance validate-schema --strict
-uv run se_mapping_assurance validate-alignment --path examples/alignment.toml --strict
+uv run se-mapping-assurance validate-schema --strict
+uv run se-mapping-assurance validate-mapping --path examples/record-001.toml --strict
 
 # Remove old build artifacts.
 Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
@@ -102,7 +116,7 @@ $artifacts = Get-ChildItem dist -File |
 uv run python -m twine check @artifacts
 
 # Verify that the wheel contains the canonical schema.
-uv run python -c "from pathlib import Path; from zipfile import ZipFile; wheels = list(Path('dist').glob('*.whl')); assert len(wheels) == 1, 'Expected exactly one wheel'; names = ZipFile(wheels[0]).namelist(); assert 'se_mapping_assurance/alignment-schema.toml' in names, 'Packaged schema missing'; print('Wheel schema verified')"
+uv run python -c "from pathlib import Path; from zipfile import ZipFile; wheels = list(Path('dist').glob('*.whl')); assert len(wheels) == 1, 'Expected exactly one wheel'; names = ZipFile(wheels[0]).namelist(); assert 'se_mapping_assurance/assurance-mapping-schema.toml' in names, 'Packaged schema missing'; print('Wheel schema verified')"
 ```
 
 ### Task 4. Commit, push, tag

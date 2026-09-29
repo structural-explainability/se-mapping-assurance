@@ -26,7 +26,7 @@ def repo_root_schema_path(start: Path | None = None) -> Path | None:
             continue
         try:
             metadata = load_toml(pyproject)
-        except (OSError, tomllib.TOMLDecodeError):
+        except OSError, tomllib.TOMLDecodeError:
             continue
         if metadata.get("project", {}).get("name") == "se-mapping-assurance":
             return schema

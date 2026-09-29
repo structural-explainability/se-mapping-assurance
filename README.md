@@ -52,6 +52,13 @@ uv sync
 uv audit
 ```
 
+### Validate the Schema and Example
+
+```shell
+uv run se-mapping-assurance validate-schema --strict
+uv run se-mapping-assurance validate-mapping --path examples/record-001.toml --strict
+```
+
 ## Canonical Schema
 
 [assurance-mapping-schema.toml](assurance-mapping-schema.toml)
