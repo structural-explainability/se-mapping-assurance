@@ -23,7 +23,7 @@ permissions:
 env:
   PYTHONUNBUFFERED: "1"       # WHY: Real-time logging.
   PYTHONIOENCODING: "utf-8"   # WHY: Ensure UTF-8 encoding for international characters.
-  UV_FROZEN: "1" # WHY: CI MUST use the committed lockfile without updating it.
+  UV_LOCKED: "1" # WHY: CI MUST use the committed lockfile without updating it.
 
 concurrency:
   group: release-${{ github.ref }}
@@ -72,7 +72,7 @@ jobs:
         # OBS: uv manages the interpreter locally in the CI environment.
 
       - name: A4) Install dependencies from committed lockfile
-        run: uv sync --frozen
+        run: uv sync
         # WHY: Install all configured dependency groups exactly from uv.lock.
         # REQ: CI MUST fail rather than update a stale or incompatible lockfile.
 
