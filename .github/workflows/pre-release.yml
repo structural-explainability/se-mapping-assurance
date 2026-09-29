@@ -24,7 +24,6 @@ jobs:
   pre-release:
     runs-on: ubuntu-latest
     timeout-minutes: 30 # WHY: Prevent hanging jobs. If over, it is likely stuck.
-    environment: pypi # WHY: Use 'pypi' environment for PyPI publishing; ignore warnings.
 
     steps:
       # === ASSEMBLE ===
@@ -93,9 +92,9 @@ jobs:
         shell: bash
         run: |
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
-            uv run --locked se_mapspec check-version --require-tag
+            uv run --locked se_mapping_assurance check-version --require-tag
           else
-            uv run --locked se_mapspec check-version
+            uv run --locked se_mapping_assurance check-version
           fi
 
       - name: B3) Run lint and type checks
@@ -107,13 +106,13 @@ jobs:
       - name: B4) Run tests
         run: uv run --locked pytest
 
-      - name: B5) Validate canonical alignment schema
-        run: uv run --locked se_mapspec validate-schema --strict
+      - name: B5) Validate canonical assurance mapping schema
+        run: uv run --locked se-mapping-assurance validate-schema --strict
 
-      - name: B6) Validate example alignment
+      - name: B6) Validate example assurance mapping
         run: |
-          uv run --locked se_mapspec validate-alignment \
-            --path examples/alignment.toml \
+          uv run --locked se-mapping-assurance validate-mapping \
+            --path examples/record-001.toml \
             --strict
 
       - name: B7) Verify git is clean before build
@@ -168,8 +167,8 @@ jobs:
           print(matches)
 
           assert (
-              "se_mapspec/assurance-mapping-schema.toml" in names
-          ), "Wheel is missing se_mapspec/assurance-mapping-schema.toml"
+              "se_mapping_assurance/assurance-mapping-schema.toml" in names
+          ), "Wheel is missing se_mapping_assurance/assurance-mapping-schema.toml"
           PY
 
       - name: C3) Sync dependencies after build

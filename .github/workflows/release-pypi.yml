@@ -18,8 +18,7 @@ on:
       - "v*.*.*"
 
 permissions:
-  contents: read   # WHY: Create GitHub Release.
-  pages: write      # WHY: Required to deploy to GitHub Pages.
+  contents: read
 
 env:
   PYTHONUNBUFFERED: "1"       # WHY: Real-time logging.
